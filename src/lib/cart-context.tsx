@@ -1,13 +1,18 @@
 import React, { createContext, useContext, useState, useCallback } from "react";
-import type { MenuItem } from "./menu-data";
+import type { DbMenuItem } from "@/hooks/use-menu-items";
 
-export interface CartItem extends MenuItem {
+export interface CartItem {
+  id: string;
+  name: string;
+  price: number;
+  image_url: string;
   quantity: number;
+  stock: number;
 }
 
 interface CartContextType {
   items: CartItem[];
-  addItem: (item: MenuItem) => void;
+  addItem: (item: DbMenuItem) => void;
   removeItem: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
@@ -23,13 +28,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
 
-  const addItem = useCallback((item: MenuItem) => {
+  const addItem = useCallback((item: DbMenuItem) => {
     setItems((prev) => {
       const existing = prev.find((i) => i.id === item.id);
       if (existing) {
+        if (existing.quantity >= item.stock) return prev;
         return prev.map((i) => i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i);
       }
-      return [...prev, { ...item, quantity: 1 }];
+      return [...prev, { id: item.id, name: item.name, price: item.price, image_url: item.image_url, quantity: 1, stock: item.stock }];
     });
   }, []);
 
@@ -41,12 +47,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     if (quantity <= 0) {
       setItems((prev) => prev.filter((i) => i.id !== id));
     } else {
-      setItems((prev) => prev.map((i) => i.id === id ? { ...i, quantity } : i));
+      setItems((prev) => prev.map((i) => i.id === id ? { ...i, quantity: Math.min(quantity, i.stock) } : i));
     }
   }, []);
 
   const clearCart = useCallback(() => setItems([]), []);
-
   const totalItems = items.reduce((sum, i) => sum + i.quantity, 0);
   const totalPrice = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
 
