@@ -1,5 +1,6 @@
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
+import PromotionsBanner from "@/components/PromotionsBanner";
 import MenuSection from "@/components/MenuSection";
 import CartDrawer from "@/components/CartDrawer";
 import Footer from "@/components/Footer";
@@ -9,6 +10,7 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       <HeroSection />
+      <PromotionsBanner />
       <MenuSection />
       <CartDrawer />
       <Footer />
